@@ -1,3 +1,10 @@
+# Full local stack: Postgres + one-shot loader/seed + API + dashboard.
+#   docker compose up        -> brings everything up (init runs once, then exits)
+#   docker compose down      -> stops; the pgdata volume (and your data) is kept
+#
+# Config is via .env (copy from .env.example). For the NL-to-SQL endpoint set
+# GEMINI_API_KEY, or set LLM_PROVIDER=echo to run it offline.
+
 services:
   db:
     image: postgres:16
@@ -16,6 +23,53 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # One-shot: load the 9 CSVs + build the analytics schema, then seed the app
+  # schema (users, audit_log, read-only role + default admin). Exits when done.
+  init:
+    build: .
+    command: sh -c "python -m src.warehouse.load && python -m src.api.auth.manage init"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-analytics}
+      POSTGRES_DB: ${POSTGRES_DB:-analytics}
+    volumes:
+      - ./data:/app/data          # raw CSVs are mounted, not baked into the image
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: .
+    command: sh -c "uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-analytics}
+      POSTGRES_DB: ${POSTGRES_DB:-analytics}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+
+  dashboard:
+    build: .
+    command: sh -c "streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port 8501"
+    environment:
+      API_BASE_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
 
 volumes:
   pgdata:

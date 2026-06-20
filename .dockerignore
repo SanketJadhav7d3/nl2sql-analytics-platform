@@ -1,0 +1,11 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.env
+# Raw dataset is mounted at runtime for the loader, not baked into the image.
+data/raw/*.csv
+# Screenshots live in docs/ but aren't needed in the image.
+docs/*.png
