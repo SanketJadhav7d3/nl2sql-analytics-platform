@@ -66,6 +66,35 @@ class GeminiAdapter(LLMAdapter):
         return json.loads(resp.text)["sql"]
 
 
+class GroqAdapter(LLMAdapter):
+    """Fallback provider — Groq exposes an OpenAI-compatible API, called via
+    the `openai` SDK pointed at Groq's base URL. Used automatically when
+    Gemini errors (e.g. quota exhausted) and a GROQ_API_KEY is configured."""
+
+    def __init__(self, model: str | None = None, api_key: str | None = None):
+        from openai import OpenAI  # imported lazily so the package isn't required unless used
+
+        self.model = model or settings.groq_model
+        self.client = OpenAI(api_key=api_key or settings.groq_api_key, base_url="https://api.groq.com/openai/v1")
+
+    def generate_sql(self, question: str, schema_prompt: str) -> str:
+        from ..llm_util import groq_call_with_retry
+
+        def request(model: str) -> str:
+            resp = self.client.chat.completions.create(
+                model=model,
+                temperature=0,
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT + '\nRespond with JSON: {"sql": "..."}'},
+                    {"role": "user", "content": f"{schema_prompt}\n\nQuestion: {question}"},
+                ],
+            )
+            return json.loads(resp.choices[0].message.content)["sql"]
+
+        return groq_call_with_retry(request, model=self.model, fallback_model=settings.groq_fallback_model)
+
+
 class EchoAdapter(LLMAdapter):
     """Offline fallback. Returns a fixed safe query regardless of the question —
     useful for demoing the endpoint and guardrails without an API key."""
@@ -77,9 +106,26 @@ class EchoAdapter(LLMAdapter):
         )
 
 
+class FallbackAdapter(LLMAdapter):
+    """Tries `primary`; on any error (e.g. Gemini quota exhausted), retries
+    with `secondary` instead of failing the request outright."""
+
+    def __init__(self, primary: LLMAdapter, secondary: LLMAdapter):
+        self.primary = primary
+        self.secondary = secondary
+
+    def generate_sql(self, question: str, schema_prompt: str) -> str:
+        try:
+            return self.primary.generate_sql(question, schema_prompt)
+        except Exception:  # noqa: BLE001  (deliberately broad — any primary failure falls back)
+            return self.secondary.generate_sql(question, schema_prompt)
+
+
 @lru_cache(maxsize=1)
 def get_adapter() -> LLMAdapter:
-    """FastAPI dependency. Cached so the SDK client is built once."""
+    """FastAPI dependency. Cached so the SDK client(s) are built once."""
     if settings.llm_provider == "echo":
         return EchoAdapter()
+    if settings.groq_api_key:
+        return FallbackAdapter(GeminiAdapter(), GroqAdapter())
     return GeminiAdapter()

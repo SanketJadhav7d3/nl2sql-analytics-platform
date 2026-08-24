@@ -3,18 +3,19 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from .routers import admin, auth, metrics, nlquery, query
+from .routers import admin, auth, metrics, nlquery, query, story
 
 app = FastAPI(
     title="Self-Service Analytics — Reporting API",
     version="0.4.0",
-    description="KPI endpoints, JWT RBAC, audit log, vetted ad-hoc SQL, and NL-to-SQL.",
+    description="KPI endpoints, JWT RBAC, audit log, vetted ad-hoc SQL, NL-to-SQL, and agentic data stories.",
 )
 
 app.include_router(auth.router)
 app.include_router(metrics.router)
 app.include_router(query.router)
 app.include_router(nlquery.router)
+app.include_router(story.router)
 app.include_router(admin.router)
 
 

@@ -16,17 +16,9 @@ Dashboard (Streamlit)  ──REST + JWT──▶  FastAPI backend  ──paramet
 
 ---
 
-## Screenshots
+## Live demo
 
-**Dashboard** — a chart for every KPI endpoint:
-
-![Dashboard](docs/dashboard.png)
-<!-- placeholder: add docs/dashboard.png (Streamlit dashboard with the metric charts) -->
-
-**"Ask your data"** — natural-language question → generated SQL (shown for transparency) → results:
-
-![NL-to-SQL](docs/nl2sql.png)
-<!-- placeholder: add docs/nl2sql.png (the Ask-your-data box showing a question, the SQL, and the table/chart) -->
+**[analytics-frontend-421143431694.europe-west1.run.app](https://analytics-frontend-421143431694.europe-west1.run.app)**
 
 ---
 

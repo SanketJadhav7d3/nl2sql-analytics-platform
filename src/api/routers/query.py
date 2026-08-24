@@ -27,7 +27,7 @@ def run_query(
     except Exception as exc:  # noqa: BLE001  (e.g. permission denied from RO role)
         service.record_audit(user["username"], user["role"], "query",
                              status="error", detail=f"{body.sql} -> {exc}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "query failed")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"query failed: {exc}")
 
     service.record_audit(user["username"], user["role"], "query",
                          status="allowed", detail=body.sql)

@@ -26,7 +26,9 @@ from dotenv import load_dotenv
 # --- paths -------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 SQL_DIR = ROOT / "sql"
-DATA_DIR = ROOT / "data" / "raw"
+# Source CSVs live in data/raw/ by default. CI (and the test sample) point this
+# at a smaller, committed dataset via the DATA_DIR env var.
+DATA_DIR = Path(os.getenv("DATA_DIR") or ROOT / "data" / "raw")
 
 # CSV file -> fully-qualified raw table. Column lists are omitted because the
 # CSV header order matches each table's column order (HEADER true skips it).

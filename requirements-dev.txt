@@ -1,0 +1,3 @@
+# Dev/CI-only tooling. Runtime deps live in requirements.txt (pytest is there
+# too, since the test job installs the full runtime to exercise the app).
+ruff>=0.6
