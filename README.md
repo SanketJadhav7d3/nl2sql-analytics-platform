@@ -7,7 +7,8 @@ behind a React dashboard.
 
 **Live demo:** [analytics-frontend-421143431694.europe-west1.run.app](https://analytics-frontend-421143431694.europe-west1.run.app)
 
-**Demo video:** [videos/analytics-platform.mp4](videos/analytics-platform.mp4)
+https://github.com/user-attachments/assets/7c0e6672-9cae-4dd5-9375-b1def725e1ef
+
 
 ---
 
