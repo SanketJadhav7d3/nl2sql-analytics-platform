@@ -18,7 +18,7 @@ router = APIRouter(tags=["nl-query"])
 @router.post("/nl-query", response_model=NLQueryResponse)
 def post_nl_query(
     body: NLQueryRequest,
-    user: dict[str, Any] = Depends(authorized("analyst", "admin")),
+    user: dict[str, Any] = Depends(authorized("viewer", "analyst", "admin")),
     adapter: LLMAdapter = Depends(get_adapter),
 ) -> NLQueryResponse:
     try:
@@ -31,7 +31,7 @@ def post_nl_query(
         service.record_audit(user["username"], user["role"], "nl-query",
                              status="error", detail=f"{body.question} -> {exc}")
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            "could not answer question")
+                            f"could not answer question: {exc}")
 
     service.record_audit(user["username"], user["role"], "nl-query",
                          status="allowed",

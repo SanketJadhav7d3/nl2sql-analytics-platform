@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Space-black surfaces */
+  --color-void: #05050a;
+  --color-page: #0a0a10;
+  --color-surface: #101018;
+  --color-surface-raised: #161620;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-hairline-strong: rgba(255, 255, 255, 0.14);
+
+  /* Ink */
+  --color-ink-primary: #f5f5f7;
+  --color-ink-secondary: #b8b8c4;
+  --color-ink-muted: #7a7a89;
+
+  /* Brand / accent (nebula violet-blue) */
+  --color-accent: #6d7bff;
+  --color-accent-dim: #4c52c4;
+  --color-accent-glow: #8f9bff;
+
+  /* Categorical (dark-mode steps, from validated palette) */
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+  --color-series-4: #c98500;
+  --color-series-5: #d55181;
+  --color-series-6: #008300;
+  --color-series-7: #9085e9;
+  --color-series-8: #e66767;
+
+  /* Status */
+  --color-good: #0ca30c;
+  --color-warning: #fab219;
+  --color-serious: #ec835a;
+  --color-critical: #d03b3b;
+
+  --radius-card: 14px;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Nebula glow — static gradient wash behind the animated particle canvas */
+.starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(109, 123, 255, 0.14), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 10%, rgba(157, 100, 255, 0.08), transparent 60%),
+    var(--color-void);
+}
+
+.particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.card {
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(20px);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-accent-dim);
+  color: white;
+}
+
+/* thin scrollbar, space-appropriate */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-hairline-strong); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }

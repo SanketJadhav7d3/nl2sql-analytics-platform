@@ -165,3 +165,26 @@ class RepeatCustomersResponse(BaseModel):
     total_revenue: float
     repeat_revenue: float
     repeat_revenue_share_pct: float
+
+
+# ---- /story ---------------------------------------------------------------
+# A conversation: the client holds the transcript (`history`) and resends it
+# with each new `message`, so the server stays stateless per request while
+# the agent still "remembers" everything it already investigated.
+class StoryStep(BaseModel):
+    """One turn of the conversation: a user message, agent narration, or a
+    SQL tool call + the (small, already-reduced) result it got back."""
+    role: Literal["user", "assistant"] = "assistant"
+    narration: str | None = None
+    sql: str | None = None
+    columns: list[str] | None = None
+    rows: list[dict[str, Any]] | None = None
+
+
+class StoryRequest(BaseModel):
+    message: str
+    history: list[StoryStep] = []
+
+
+class StoryResponse(BaseModel):
+    steps: list[StoryStep]  # only the NEW steps produced by this turn

@@ -34,8 +34,19 @@ class Settings(BaseSettings):
     # NL-to-SQL assistant (Google Gemini). Set GEMINI_API_KEY in the env / .env.
     # Provider "echo" runs offline (no LLM call), used for tests/demos.
     llm_provider: str = "gemini"           # "gemini" | "echo"
-    llm_model: str = "gemini-2.5-flash"
+    llm_model: str = "gemini-3.6-flash"
     gemini_api_key: str | None = None      # from GEMINI_API_KEY
+
+    # Fallback provider: used automatically if Gemini errors (e.g. quota
+    # exhausted) and a GROQ_API_KEY is configured. Groq exposes an
+    # OpenAI-compatible API, so it's called via the `openai` SDK pointed at
+    # Groq's base URL.
+    groq_api_key: str | None = None        # from GROQ_API_KEY
+    groq_model: str = "openai/gpt-oss-120b"
+    # Smaller/cheaper model tried when `groq_model` hits a 429 (rate limit) —
+    # Groq enforces per-model tokens-per-minute budgets, so a lighter model
+    # often still has headroom even while the primary one is throttled.
+    groq_fallback_model: str = "llama-3.1-8b-instant"
 
     @property
     def database_url(self) -> str:

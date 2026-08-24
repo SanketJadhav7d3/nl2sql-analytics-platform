@@ -6,3 +6,6 @@ __pycache__/
 venv/
 # Raw dataset is large; keep it out of git.
 data/raw/*.csv
+# Personal learning notes, not project docs.
+docs/gcp-deployment-guide.html
+docs/GCP_Deployment_Guide.pdf
