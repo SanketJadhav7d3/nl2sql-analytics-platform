@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { api, apiErrorMessage } from '../lib/api'
-import type { NLQueryResponse } from '../lib/types'
+import { useAskAI } from '../context/AskAIContext'
 import { Card } from '../components/Card'
 import { ResultsView } from '../components/ResultsView'
 import { Spinner, ErrorNote } from '../components/Spinner'
@@ -26,40 +25,38 @@ function pickRandomExamples(n: number): string[] {
 }
 
 export function AskAI() {
-  const [question, setQuestion] = useState('')
-  const [result, setResult] = useState<NLQueryResponse | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { question, setQuestion, result, loading, error, ask, clear } = useAskAI()
   const [examples, setExamples] = useState(() => pickRandomExamples(6))
 
-  async function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!question.trim()) return
-    setLoading(true)
-    setError(null)
-    setResult(null)
-    try {
-      const { data } = await api.post<NLQueryResponse>('/nl-query', { question })
-      setResult(data)
-    } catch (err) {
-      setError(apiErrorMessage(err))
-    } finally {
-      setLoading(false)
-    }
+    ask(question)
   }
+
+  const started = !!result || !!error || loading
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-semibold">Ask AI</h1>
-        <p className="text-sm text-ink-muted mt-1">
-          Ask a question in plain English — it's turned into guarded, read-only SQL against the warehouse.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Ask AI</h1>
+          <p className="text-sm text-ink-muted mt-1">
+            Ask a question in plain English — it's turned into guarded, read-only SQL against the warehouse.
+          </p>
+        </div>
+        {started && (
+          <button
+            onClick={clear}
+            className="shrink-0 text-xs text-ink-secondary hover:text-ink-primary border border-hairline hover:border-hairline-strong rounded-lg px-3 py-1.5 transition-colors"
+          >
+            + New question
+          </button>
+        )}
       </div>
 
       <div className="text-xs text-warning bg-warning/10 border border-warning/25 rounded-lg px-3 py-2">
         This runs on a personal, rate-limited Gemini API key (a hobby project, not a production service) — you may
-        occasionally hit quota limits or slower responses, especially under heavy use.
+        occasionally hit the limit.
       </div>
 
       <form onSubmit={onSubmit} className="card p-4 flex gap-3">

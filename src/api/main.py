@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from . import tracing  # noqa: F401  (configures MLflow tracking on import)
 from .routers import admin, auth, metrics, nlquery, query, story
 
 app = FastAPI(

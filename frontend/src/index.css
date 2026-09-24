@@ -40,6 +40,12 @@
   --radius-card: 14px;
 }
 
+html {
+  /* Bumps every rem-based Tailwind size (text-sm, text-base, ...) up
+     proportionally across the whole app. */
+  font-size: 18px;
+}
+
 html, body, #root {
   height: 100%;
 }

@@ -19,14 +19,14 @@ def run_query(
     user: dict[str, Any] = Depends(authorized("analyst", "admin")),
 ) -> QueryResponse:
     try:
-        rows = run_read_only(body.sql)
+        rows = run_read_only(body.sql, body.dataset)
     except GuardrailError as exc:
         service.record_audit(user["username"], user["role"], "query",
-                             status="denied", detail=f"{body.sql} -> {exc}")
+                             status="denied", detail=f"[{body.dataset}] {body.sql} -> {exc}")
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"guardrail: {exc}")
     except Exception as exc:  # noqa: BLE001  (e.g. permission denied from RO role)
         service.record_audit(user["username"], user["role"], "query",
-                             status="error", detail=f"{body.sql} -> {exc}")
+                             status="error", detail=f"[{body.dataset}] {body.sql} -> {exc}")
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"query failed: {exc}")
 
     service.record_audit(user["username"], user["role"], "query",

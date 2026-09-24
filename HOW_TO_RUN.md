@@ -82,28 +82,7 @@ Invoke-RestMethod -Method Post http://127.0.0.1:8000/nl-query -Headers $h `
 
 ---
 
-## 4. Launch the dashboard (Streamlit)
-
-The dashboard talks to the API over HTTP, so the API (section 2) must be running.
-In a separate terminal:
-
-```powershell
-.\.venv\Scripts\python.exe -m streamlit run dashboard/app.py
-```
-
-Opens at **http://localhost:8501**. Log in from the sidebar (default admin / admin123).
-You get a chart for each metric plus an **"Ask your data"** box (analyst/admin) that
-calls `/nl-query` and shows the generated SQL.
-
-If the API runs on a different host/port, point the dashboard at it:
-
-```powershell
-$env:API_BASE_URL = "http://127.0.0.1:8000"
-```
-
----
-
-## 5. Run the automated tests
+## 4. Run the automated tests
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q

@@ -12,6 +12,7 @@ import json
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
+import mlflow
 from pydantic import BaseModel
 
 from ..config import settings
@@ -49,7 +50,9 @@ class GeminiAdapter(LLMAdapter):
         # No key here -> SDK reads GEMINI_API_KEY / GOOGLE_API_KEY from the env.
         self.client = genai.Client(api_key=key) if key else genai.Client()
 
+    @mlflow.trace(name="gemini.generate_sql", span_type="LLM")
     def generate_sql(self, question: str, schema_prompt: str) -> str:
+        mlflow.update_current_trace(tags={"provider": "gemini", "model": self.model})
         resp = self.client.models.generate_content(
             model=self.model,
             contents=f"{schema_prompt}\n\nQuestion: {question}",
@@ -61,9 +64,9 @@ class GeminiAdapter(LLMAdapter):
             },
         )
         parsed = getattr(resp, "parsed", None)
-        if isinstance(parsed, _SQLOut):
-            return parsed.sql
-        return json.loads(resp.text)["sql"]
+        sql = parsed.sql if isinstance(parsed, _SQLOut) else json.loads(resp.text)["sql"]
+        mlflow.update_current_trace(tags={"sql": sql})
+        return sql
 
 
 class GroqAdapter(LLMAdapter):
@@ -77,10 +80,15 @@ class GroqAdapter(LLMAdapter):
         self.model = model or settings.groq_model
         self.client = OpenAI(api_key=api_key or settings.groq_api_key, base_url="https://api.groq.com/openai/v1")
 
+    @mlflow.trace(name="groq.generate_sql", span_type="LLM")
     def generate_sql(self, question: str, schema_prompt: str) -> str:
         from ..llm_util import groq_call_with_retry
 
+        used_model = self.model
+
         def request(model: str) -> str:
+            nonlocal used_model
+            used_model = model
             resp = self.client.chat.completions.create(
                 model=model,
                 temperature=0,
@@ -92,7 +100,9 @@ class GroqAdapter(LLMAdapter):
             )
             return json.loads(resp.choices[0].message.content)["sql"]
 
-        return groq_call_with_retry(request, model=self.model, fallback_model=settings.groq_fallback_model)
+        sql = groq_call_with_retry(request, model=self.model, fallback_model=settings.groq_fallback_model)
+        mlflow.update_current_trace(tags={"provider": "groq", "model": used_model, "sql": sql})
+        return sql
 
 
 class EchoAdapter(LLMAdapter):
@@ -114,10 +124,15 @@ class FallbackAdapter(LLMAdapter):
         self.primary = primary
         self.secondary = secondary
 
+    @mlflow.trace(name="nl_query.generate_sql", span_type="CHAIN")
     def generate_sql(self, question: str, schema_prompt: str) -> str:
+        mlflow.update_current_trace(tags={"question": question})
         try:
-            return self.primary.generate_sql(question, schema_prompt)
-        except Exception:  # noqa: BLE001  (deliberately broad — any primary failure falls back)
+            sql = self.primary.generate_sql(question, schema_prompt)
+            mlflow.update_current_trace(tags={"fell_back": "false"})
+            return sql
+        except Exception as exc:  # noqa: BLE001  (deliberately broad — any primary failure falls back)
+            mlflow.update_current_trace(tags={"fell_back": "true", "primary_error": str(exc)})
             return self.secondary.generate_sql(question, schema_prompt)
 
 

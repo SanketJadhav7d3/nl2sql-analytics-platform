@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://analytics-api-dmh7lgwi4q-ew.a.run.app',
+        target: 'https://analytics-api-421143431694.europe-west1.run.app',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

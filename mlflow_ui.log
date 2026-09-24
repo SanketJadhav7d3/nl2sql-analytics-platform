@@ -1,0 +1,211 @@
+Registry store URI not provided. Using backend store URI.
+2026/08/24 18:53:06 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/08/24 18:53:06 INFO mlflow.store.db.utils: Updating database tables
+[MLflow] Security middleware enabled with default settings (localhost-only). To allow connections from other hosts, use --host 0.0.0.0 and configure --allowed-hosts and --cors-allowed-origins.
+2026/08/24 18:53:11 WARNING mlflow.server: MLflow job execution requirements not met (MLflow job backend does not support Windows system.). Server will start without job execution support. Errors will be surfaced at job invocation time.
+c:\Users\Darkness\Learnings\analytics-platform\.venv\Lib\site-packages\mlflow\server\fastapi_app.py:19: StarletteDeprecationWarning: starlette.middleware.wsgi is deprecated and will be removed in a future release. Please refer to https://github.com/abersheeran/a2wsgi as a replacement.
+  from starlette.middleware.wsgi import WSGIResponder, build_environ
+2026/08/24 18:53:16 INFO:     Uvicorn running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+2026/08/24 18:53:16 INFO:     Started parent process [3428]
+c:\Users\Darkness\Learnings\analytics-platform\.venv\Lib\site-packages\mlflow\server\fastapi_app.py:19: StarletteDeprecationWarning: starlette.middleware.wsgi is deprecated and will be removed in a future release. Please refer to https://github.com/abersheeran/a2wsgi as a replacement.
+  from starlette.middleware.wsgi import WSGIResponder, build_environ
+c:\Users\Darkness\Learnings\analytics-platform\.venv\Lib\site-packages\mlflow\server\fastapi_app.py:19: StarletteDeprecationWarning: starlette.middleware.wsgi is deprecated and will be removed in a future release. Please refer to https://github.com/abersheeran/a2wsgi as a replacement.
+  from starlette.middleware.wsgi import WSGIResponder, build_environ
+c:\Users\Darkness\Learnings\analytics-platform\.venv\Lib\site-packages\mlflow\server\fastapi_app.py:19: StarletteDeprecationWarning: starlette.middleware.wsgi is deprecated and will be removed in a future release. Please refer to https://github.com/abersheeran/a2wsgi as a replacement.
+  from starlette.middleware.wsgi import WSGIResponder, build_environ
+c:\Users\Darkness\Learnings\analytics-platform\.venv\Lib\site-packages\mlflow\server\fastapi_app.py:19: StarletteDeprecationWarning: starlette.middleware.wsgi is deprecated and will be removed in a future release. Please refer to https://github.com/abersheeran/a2wsgi as a replacement.
+  from starlette.middleware.wsgi import WSGIResponder, build_environ
+2026/08/24 18:53:26 INFO:     Started server process [7212]
+2026/08/24 18:53:26 INFO:     Waiting for application startup.
+2026/08/24 18:53:26 INFO:     Application startup complete.
+2026/08/24 18:53:26 INFO:     Started server process [23100]
+2026/08/24 18:53:26 INFO:     Waiting for application startup.
+2026/08/24 18:53:26 INFO:     Application startup complete.
+2026/08/24 18:53:26 INFO:     Started server process [3364]
+2026/08/24 18:53:26 INFO:     Waiting for application startup.
+2026/08/24 18:53:26 INFO:     Application startup complete.
+2026/08/24 18:53:26 INFO:     Started server process [29228]
+2026/08/24 18:53:26 INFO:     Waiting for application startup.
+2026/08/24 18:53:26 INFO:     Application startup complete.
+2026/08/24 18:53:42 INFO:     127.0.0.1:60272 - "GET / HTTP/1.1" 200 OK
+2026/08/24 18:54:50 INFO:     127.0.0.1:55865 - "GET / HTTP/1.1" 200 OK
+2026/08/24 18:54:50 INFO:     127.0.0.1:55865 - "GET /static-files/static/js/main.2d33035e.js HTTP/1.1" 200 OK
+2026/08/24 18:54:51 INFO:     127.0.0.1:51842 - "GET /static-files/static/css/main.b0f58ef9.css HTTP/1.1" 200 OK
+2026/08/24 18:54:56 INFO:     127.0.0.1:64337 - "GET / HTTP/1.1" 200 OK
+2026/08/24 18:54:56 INFO:     127.0.0.1:64337 - "GET /static-files/static/js/main.2d33035e.js HTTP/1.1" 200 OK
+2026/08/24 18:54:56 INFO:     127.0.0.1:64342 - "GET /static-files/static/css/main.b0f58ef9.css HTTP/1.1" 200 OK
+2026/08/24 18:54:57 INFO:     127.0.0.1:64337 - "GET /static-files/TelemetryLogger.telemetry-worker.d0f8ea2c83c08b63528f.worker.js HTTP/1.1" 200 OK
+2026/08/24 18:54:57 INFO:     127.0.0.1:64348 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+2026/08/24 18:54:58 INFO:     127.0.0.1:64337 - "GET /ajax-api/3.0/mlflow/ui-telemetry HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64342 - "GET /ajax-api/3.0/mlflow/server-info HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64342 - "GET /ajax-api/2.0/mlflow/users/current HTTP/1.1" 404 Not Found
+2026/08/24 18:54:59 INFO:     127.0.0.1:64337 - "GET /static-files/static/js/4205.9e750e7b.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64348 - "GET /ajax-api/3.0/mlflow/assistant/config HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64337 - "GET /static-files/static/js/3877.d7c15624.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64342 - "GET /ajax-api/3.0/mlflow/assistant/config HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64342 - "GET /static-files/static/css/5027.26533251.chunk.css HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64337 - "GET /static-files/static/js/7340.cdf02082.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64360 - "GET /static-files/static/media/demo-tracing-screenshot-dark.5cb0c24b165d2ed2fef0.png HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64348 - "GET /static-files/static/js/5027.0a6d4690.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:54:59 INFO:     127.0.0.1:64342 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=5&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+2026/08/24 18:55:00 INFO:     127.0.0.1:64356 - "GET /ajax-api/3.0/mlflow/assistant/providers HTTP/1.1" 200 OK
+2026/08/24 18:55:00 INFO:     127.0.0.1:64342 - "GET /static-files/static/media/claude-code.658402b49b66f4df4aaed26cc6a88a8b.svg HTTP/1.1" 200 OK
+2026/08/24 18:55:01 INFO:     127.0.0.1:64337 - "GET /ajax-api/3.0/mlflow/assistant/providers HTTP/1.1" 200 OK
+2026/08/24 18:55:08 INFO:     127.0.0.1:64404 - "GET /static-files/static/js/3448.03d1edc1.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:08 INFO:     127.0.0.1:64406 - "GET /static-files/static/css/5439.24118451.chunk.css HTTP/1.1" 200 OK
+2026/08/24 18:55:08 INFO:     127.0.0.1:64405 - "GET /static-files/static/js/2809.fc40b8c2.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:08 INFO:     127.0.0.1:64404 - "GET /static-files/static/js/5439.43feaff9.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:08 INFO:     127.0.0.1:64402 - "GET /static-files/static/js/6507.352ad2e0.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:09 INFO:     127.0.0.1:64401 - "GET /static-files/static/js/9861.2d6b3bae.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:09 INFO:     127.0.0.1:64403 - "GET /static-files/static/js/353.df7e2039.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:09 INFO:     127.0.0.1:64408 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64406 - "POST /graphql HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64403 - "GET /static-files/static/js/6395.04086c2d.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64402 - "GET /static-files/static/js/5907.7b7121c7.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64401 - "GET /static-files/static/js/9848.ec12cf57.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64405 - "GET /static-files/static/js/9538.8351da75.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64405 - "GET /static-files/static/js/2012.1ddb734e.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64403 - "GET /static-files/static/js/7877.54908f75.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64406 - "GET /static-files/static/js/9067.923c3c2c.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64404 - "GET /static-files/static/js/306.d09d6095.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64407 - "GET /static-files/static/js/6306.d8ef0f6a.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64403 - "GET /static-files/static/js/3269.4abb53f2.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64402 - "GET /static-files/static/js/5105.ac05ca79.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64405 - "GET /static-files/static/js/4565.5701d6a7.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64408 - "GET /static-files/static/js/7406.211247d8.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64402 - "GET /static-files/static/js/90.22a40de9.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64404 - "GET /static-files/static/js/6895.6f067ee9.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64405 - "GET /static-files/static/js/8359.35efdf16.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64403 - "GET /static-files/static/js/7455.b2b69708.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:11 INFO:     127.0.0.1:64401 - "GET /static-files/static/js/4899.bad65f94.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64403 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64408 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64401 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64405 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64404 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64406 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64401 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64403 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64405 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64402 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:12 INFO:     127.0.0.1:64407 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:20 INFO:     127.0.0.1:64454 - "GET /static-files/static/js/1980.91d1e5df.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:20 INFO:     127.0.0.1:64453 - "GET /static-files/static/js/9122.306b7848.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:20 INFO:     127.0.0.1:64453 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60_mlflow_experiment_ids%60+ILIKE+%27%25%2C0%2C%25%27 HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64465 - "GET /static-files/static/js/9360.bb030072.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/855.25446ffc.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64464 - "GET /static-files/static/js/8209.825773bd.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64453 - "GET /static-files/static/js/3198.bb9ac57b.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64464 - "GET /static-files/static/js/3121.3be60de2.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64465 - "GET /static-files/static/js/2369.baa8e149.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64466 - "GET /static-files/static/js/7182.983ca11e.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64454 - "GET /static-files/static/js/4863.c17ad67f.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/9867.a0762322.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64464 - "GET /static-files/static/js/3793.9c364188.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64453 - "GET /static-files/static/js/4751.3be3afde.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64465 - "GET /static-files/static/js/9662.407ba38d.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64466 - "GET /static-files/static/js/5702.205ea7af.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64464 - "GET /static-files/static/css/5343.b4cc2aa3.chunk.css HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/5343.bbb1f624.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64454 - "GET /static-files/static/js/3878.bab217aa.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64466 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64454 - "GET /static-files/static/css/2685.f073c5c3.chunk.css HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64466 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64464 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64453 - "GET /static-files/static/js/1372.38a0e73a.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:22 INFO:     127.0.0.1:64465 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64453 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64465 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64471 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64472 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64473 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64471 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64453 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64465 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64464 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:23 INFO:     127.0.0.1:64466 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+2026/08/24 18:55:25 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:25 INFO:     127.0.0.1:64466 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:25 INFO:     127.0.0.1:64466 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/2685.2f8f1b38.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/5354.dbe91b4e.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64453 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64454 - "GET /static-files/static/js/2558.bc42a2d6.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64464 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64466 - "GET /static-files/static/js/9454.331f88f0.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64466 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:26 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/ui-telemetry HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64453 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64466 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64464 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64496 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64499 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64498 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64497 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:28 INFO:     127.0.0.1:64464 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64463 - "GET /static-files/static/js/6411.84fe6bd0.chunk.js HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64454 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64496 - "GET /ajax-api/2.0/mlflow/users/current HTTP/1.1" 404 Not Found
+2026/08/24 18:55:32 INFO:     127.0.0.1:64453 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/datasets/search HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64466 - "POST /ajax-api/3.0/mlflow/traces/search HTTP/1.1" 200 OK
+2026/08/24 18:55:32 INFO:     127.0.0.1:64464 - "POST /ajax-api/3.0/mlflow/traces/metrics HTTP/1.1" 200 OK
+2026/08/24 18:55:33 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/traces/search HTTP/1.1" 200 OK
+2026/08/24 18:55:33 INFO:     127.0.0.1:64463 - "POST /ajax-api/3.0/mlflow/traces/search HTTP/1.1" 200 OK
+2026/08/25 00:45:48 INFO:     Waiting for child process [3364]
+2026/08/25 00:45:48 INFO:     Child process [3364] died
+2026/08/25 00:45:48 INFO:     Waiting for child process [16496]
+2026/08/25 00:45:48 INFO:     Child process [16496] died
+2026/08/25 00:45:49 INFO:     Waiting for child process [36656]
+2026/08/25 00:45:49 INFO:     Child process [36656] died
+2026/08/25 00:45:50 INFO:     Waiting for child process [38468]
+2026/08/25 00:45:50 INFO:     Child process [38468] died
+2026/08/25 00:45:50 INFO:     Waiting for child process [2708]
+2026/08/25 00:45:50 INFO:     Child process [2708] died
+2026/08/25 00:45:51 INFO:     Waiting for child process [13040]
+2026/08/25 00:45:51 INFO:     Child process [13040] died
+2026/08/25 00:45:51 INFO:     Waiting for child process [17100]
+2026/08/25 00:45:51 INFO:     Child process [17100] died
+2026/08/25 00:45:52 INFO:     Waiting for child process [31280]
+2026/08/25 00:45:52 INFO:     Child process [31280] died
+2026/08/25 00:45:52 INFO:     Waiting for child process [37380]
+2026/08/25 00:45:52 INFO:     Child process [37380] died
+2026/08/25 00:45:53 INFO:     Waiting for child process [18232]
+2026/08/25 00:45:53 INFO:     Child process [18232] died
+2026/08/25 00:45:53 INFO:     Waiting for child process [1816]
+2026/08/25 00:45:53 INFO:     Child process [1816] died
+2026/08/25 00:45:54 INFO:     Waiting for child process [24848]
+2026/08/25 00:45:54 INFO:     Child process [24848] died
+2026/08/25 00:45:54 INFO:     Waiting for child process [38688]
+2026/08/25 00:45:54 INFO:     Child process [38688] died
+2026/08/25 00:45:55 INFO:     Waiting for child process [27492]
+2026/08/25 00:45:55 INFO:     Child process [27492] died
+2026/08/25 00:45:55 INFO:     Waiting for child process [37168]
+2026/08/25 00:45:55 INFO:     Child process [37168] died
+2026/08/25 00:45:56 INFO:     Waiting for child process [39556]
+2026/08/25 00:45:56 INFO:     Child process [39556] died
+2026/08/25 00:45:56 INFO:     Waiting for child process [13824]
+2026/08/25 00:45:56 INFO:     Child process [13824] died
+2026/08/25 00:45:57 INFO:     Waiting for child process [7936]
+2026/08/25 00:45:57 INFO:     Child process [7936] died
+2026/08/25 00:45:57 INFO:     Waiting for child process [11460]
+2026/08/25 00:45:57 INFO:     Child process [11460] died
+2026/08/25 00:45:58 INFO:     Waiting for child process [6704]
+2026/08/25 00:45:58 INFO:     Child process [6704] died
+2026/08/25 00:45:58 INFO:     Waiting for child process [7500]
+2026/08/25 00:45:58 INFO:     Child process [7500] died
+2026/08/25 00:45:59 INFO:     Waiting for child process [8600]
+2026/08/25 00:45:59 INFO:     Child process [8600] died
+2026/08/25 00:45:59 INFO:     Waiting for child process [33736]
+2026/08/25 00:45:59 INFO:     Child process [33736] died
+2026/08/25 00:46:00 INFO:     Waiting for child process [2280]
+2026/08/25 00:46:00 INFO:     Child process [2280] died
+2026/08/25 00:46:00 INFO:     Waiting for child process [13932]
+2026/08/25 00:46:00 INFO:     Child process [13932] died
