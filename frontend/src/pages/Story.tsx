@@ -15,6 +15,30 @@ const THEMES = [
 ]
 
 function StepBubble({ step }: { step: StoryStep }) {
+  // Inline notice: the agent recovered onto its fallback provider mid-turn.
+  // Deliberately low-key -- the investigation did not fail, it changed hands,
+  // and the headline stays readable even when the underlying provider error
+  // is a wall of JSON (which is why the detail is collapsed).
+  if (step.notice) {
+    return (
+      <div className="flex justify-center">
+        <div className="max-w-[90%] text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
+          <span className="font-medium">{step.notice}</span>
+          {step.noticeDetail && (
+            <details className="mt-1.5">
+              <summary className="cursor-pointer text-ink-muted hover:text-ink-secondary">
+                What happened
+              </summary>
+              <pre className="mt-1.5 whitespace-pre-wrap break-all font-mono text-[11px] text-ink-muted">
+                {step.noticeDetail}
+              </pre>
+            </details>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   if (step.role === 'user') {
     return (
       <div className="flex justify-end">

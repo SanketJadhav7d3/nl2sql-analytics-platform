@@ -86,7 +86,8 @@ export function StoryProvider({ children }: { children: ReactNode }) {
 
   async function send(message: string) {
     if (!message.trim() || loading) return
-    const history = messages
+    // Notices are UI-only markers, not conversation content.
+    const history = messages.filter((m) => !m.notice)
     const sendGen = genRef.current
     const userStep: StoryStep = { role: 'user', narration: message, sql: null, columns: null, rows: null }
     setMessages((m) => [...m, userStep])
@@ -118,6 +119,28 @@ export function StoryProvider({ children }: { children: ReactNode }) {
               sql: event.sql ?? null,
               columns: event.columns ?? null,
               rows: event.rows ?? null,
+            },
+          ])
+        } else if (event.type === 'provider_switch') {
+          // The primary provider failed mid-turn and the executor recovered
+          // onto the fallback. Surface it inline rather than silently changing
+          // voice halfway through the investigation.
+          setPendingSql(null)
+          setMessages((m) => [
+            ...m,
+            {
+              role: 'assistant',
+              narration: null,
+              sql: null,
+              columns: null,
+              rows: null,
+              // Headline is built from the structured fields, never by
+              // parsing `message` — that string ends with the raw provider
+              // error, which is JSON and may contain any punctuation.
+              notice: `Continuing on ${event.to ?? 'the fallback model'} — ${
+                event.from ?? 'the primary model'
+              } was unavailable. Findings so far are kept.`,
+              noticeDetail: event.message ?? null,
             },
           ])
         } else if (event.type === 'error') {

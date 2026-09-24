@@ -47,13 +47,22 @@ export function apiErrorMessage(err: unknown): string {
 }
 
 export interface StoryEvent {
-  type: 'tool_call' | 'step' | 'error' | 'done'
+  type: 'tool_call' | 'step' | 'provider_switch' | 'error' | 'done'
   sql?: string
   role?: 'user' | 'assistant'
   narration?: string | null
   columns?: string[] | null
   rows?: Record<string, unknown>[] | null
   message?: string
+  /**
+   * provider_switch only: the agent's primary LLM provider failed mid-turn
+   * (quota, rate limit, server spike) and the graph executor rolled back to
+   * the last checkpoint and re-ran that node on `to`. The investigation
+   * continues with the work already done intact.
+   */
+  from?: string
+  to?: string
+  node?: string
 }
 
 /**
