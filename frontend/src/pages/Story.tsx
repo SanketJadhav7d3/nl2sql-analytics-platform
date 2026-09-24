@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { streamStory, apiErrorMessage } from '../lib/api'
+import { useEffect, useRef, type FormEvent } from 'react'
 import type { StoryStep } from '../lib/types'
+import { useStory } from '../context/StoryContext'
 import { Card } from '../components/Card'
 import { ResultsView } from '../components/ResultsView'
 import { Markdown } from '../components/Markdown'
@@ -62,75 +62,16 @@ function PendingQuery({ sql }: { sql: string }) {
 }
 
 export function Story() {
-  const [messages, setMessages] = useState<StoryStep[]>([])
-  const [pendingSql, setPendingSql] = useState<string | null>(null)
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { messages, pendingSql, loading, error, input, setInput, send, stop, clear } = useStory()
   const bottomRef = useRef<HTMLDivElement>(null)
-  const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    return () => abortRef.current?.abort()
-  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, pendingSql, loading])
 
-  async function send(message: string) {
-    if (!message.trim() || loading) return
-    const history = messages
-    const userStep: StoryStep = { role: 'user', narration: message, sql: null, columns: null, rows: null }
-    setMessages((m) => [...m, userStep])
-    setInput('')
-    setLoading(true)
-    setError(null)
-    setPendingSql(null)
-
-    const controller = new AbortController()
-    abortRef.current = controller
-
-    try {
-      for await (const event of streamStory({ message, history }, controller.signal)) {
-        if (event.type === 'tool_call') {
-          setPendingSql(event.sql ?? null)
-        } else if (event.type === 'step') {
-          setPendingSql(null)
-          setMessages((m) => [
-            ...m,
-            {
-              role: event.role ?? 'assistant',
-              narration: event.narration ?? null,
-              sql: event.sql ?? null,
-              columns: event.columns ?? null,
-              rows: event.rows ?? null,
-            },
-          ])
-        } else if (event.type === 'error') {
-          setPendingSql(null)
-          setError(event.message ?? 'The agent hit an error')
-        }
-        // "done" needs no handling — the loop just ends naturally after it
-      }
-    } catch (err) {
-      if ((err as Error)?.name !== 'AbortError') {
-        setError(apiErrorMessage(err))
-      }
-    } finally {
-      setPendingSql(null)
-      setLoading(false)
-      abortRef.current = null
-    }
-  }
-
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     send(input)
-  }
-
-  function stop() {
-    abortRef.current?.abort()
   }
 
   const started = messages.length > 0
@@ -138,11 +79,23 @@ export function Story() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-w-4xl">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold">Story</h1>
-        <p className="text-sm text-ink-muted mt-1">
-          Give it a theme — an agent investigates the warehouse across several steps, narrates what it finds live,
-          and you can keep asking follow-up questions.
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">Story</h1>
+            <p className="text-sm text-ink-muted mt-1">
+              Give it a theme — an agent investigates the warehouse across several steps, narrates what it finds
+              live, and you can keep asking follow-up questions.
+            </p>
+          </div>
+          {started && (
+            <button
+              onClick={clear}
+              className="shrink-0 text-xs text-ink-secondary hover:text-ink-primary border border-hairline hover:border-hairline-strong rounded-lg px-3 py-1.5 transition-colors"
+            >
+              + New conversation
+            </button>
+          )}
+        </div>
         <div className="text-xs text-warning bg-warning/10 border border-warning/25 rounded-lg px-3 py-2 mt-3">
           Each message runs multiple AI steps against a personal, rate-limited key — expect it to take longer than
           Ask AI, and to occasionally hit quota limits.

@@ -5,8 +5,10 @@ with each message."""
 from __future__ import annotations
 
 import json
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
+import mlflow
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
@@ -27,19 +29,25 @@ def post_story(
 
     def event_stream() -> Iterator[str]:
         status = "allowed"
-        detail = body.message
-        try:
-            for event in run_story_stream(body.message, history):
-                if event.get("type") == "error":
-                    status = "error"
-                    detail = f"{body.message} -> {event.get('message')}"
-                yield f"data: {json.dumps(event)}\n\n"
-        except Exception as exc:  # noqa: BLE001  (should be unreachable — run_story_stream catches internally)
-            status = "error"
-            detail = f"{body.message} -> {exc}"
-            yield f"data: {json.dumps({'type': 'error', 'message': str(exc)})}\n\n"
-        finally:
-            service.record_audit(user["username"], user["role"], "story", status=status, detail=detail)
+        detail = f"[{body.dataset}] {body.message}"
+        with mlflow.start_span(name="story_turn", span_type="AGENT") as span:
+            span.set_attributes({
+                "message": body.message, "history_len": len(history),
+                "user": user["username"], "dataset": body.dataset,
+            })
+            try:
+                for event in run_story_stream(body.message, history, body.dataset):
+                    if event.get("type") == "error":
+                        status = "error"
+                        detail = f"[{body.dataset}] {body.message} -> {event.get('message')}"
+                    yield f"data: {json.dumps(event)}\n\n"
+            except Exception as exc:  # noqa: BLE001  (should be unreachable — run_story_stream catches internally)
+                status = "error"
+                detail = f"[{body.dataset}] {body.message} -> {exc}"
+                yield f"data: {json.dumps({'type': 'error', 'message': str(exc)})}\n\n"
+            finally:
+                span.set_attributes({"status": status})
+                service.record_audit(user["username"], user["role"], "story", status=status, detail=detail)
 
     return StreamingResponse(
         event_stream(),

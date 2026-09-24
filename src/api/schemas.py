@@ -52,6 +52,7 @@ class AuditEntry(BaseModel):
 # ---- /query -----------------------------------------------------------------
 class QueryRequest(BaseModel):
     sql: str
+    dataset: Literal["olist", "us"] = "olist"
 
 
 class QueryResponse(BaseModel):
@@ -63,6 +64,7 @@ class QueryResponse(BaseModel):
 # ---- /nl-query --------------------------------------------------------------
 class NLQueryRequest(BaseModel):
     question: str
+    dataset: Literal["olist", "us"] = "olist"
 
 
 class NLQueryResponse(BaseModel):
@@ -184,6 +186,7 @@ class StoryStep(BaseModel):
 class StoryRequest(BaseModel):
     message: str
     history: list[StoryStep] = []
+    dataset: Literal["olist", "us"] = "olist"
 
 
 class StoryResponse(BaseModel):

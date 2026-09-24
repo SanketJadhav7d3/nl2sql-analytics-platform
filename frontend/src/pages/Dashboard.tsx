@@ -19,7 +19,9 @@ import type {
   DeliverySlaResponse,
   SellerScore,
   RepeatCustomersResponse,
+  Dataset,
 } from '../lib/types'
+import { useDataset } from '../context/DatasetContext'
 import { Card } from '../components/Card'
 import { StatTile } from '../components/StatTile'
 import { Spinner, ErrorNote } from '../components/Spinner'
@@ -63,17 +65,19 @@ interface DashboardData {
 }
 
 // Module-level cache: survives route unmount/remount within the session,
-// so navigating away and back doesn't refetch. Cleared only on full page reload.
-let cache: DashboardData | null = null
+// so navigating away and back doesn't refetch. Keyed per dataset so switching
+// datasets doesn't show stale data from the other one. Cleared on page reload.
+const cache: Partial<Record<Dataset, DashboardData>> = {}
 
-function fetchDashboardData(): Promise<DashboardData> {
+function fetchDashboardData(dataset: Dataset): Promise<DashboardData> {
+  const params = { dataset }
   return Promise.all([
-    api.get<RevenueResponse>('/metrics/revenue', { params: { granularity: 'month' } }),
-    api.get<CategoryPerformance[]>('/metrics/categories/top', { params: { limit: 8 } }),
-    api.get<AovResponse>('/metrics/aov'),
-    api.get<DeliverySlaResponse>('/metrics/delivery-sla'),
-    api.get<SellerScore[]>('/metrics/sellers/scorecard', { params: { limit: 8 } }),
-    api.get<RepeatCustomersResponse>('/metrics/repeat-customers'),
+    api.get<RevenueResponse>('/metrics/revenue', { params: { ...params, granularity: 'month' } }),
+    api.get<CategoryPerformance[]>('/metrics/categories/top', { params: { ...params, limit: 8 } }),
+    api.get<AovResponse>('/metrics/aov', { params }),
+    api.get<DeliverySlaResponse>('/metrics/delivery-sla', { params }),
+    api.get<SellerScore[]>('/metrics/sellers/scorecard', { params: { ...params, limit: 8 } }),
+    api.get<RepeatCustomersResponse>('/metrics/repeat-customers', { params }),
   ]).then(([r, c, a, s, sc, rc]) => ({
     revenue: r.data,
     categories: c.data,
@@ -85,16 +89,17 @@ function fetchDashboardData(): Promise<DashboardData> {
 }
 
 export function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(cache)
+  const { dataset } = useDataset()
+  const [data, setData] = useState<DashboardData | null>(cache[dataset] ?? null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   function load() {
     setRefreshing(true)
     setError(null)
-    fetchDashboardData()
+    fetchDashboardData(dataset)
       .then((d) => {
-        cache = d
+        cache[dataset] = d
         setData(d)
       })
       .catch((err) => setError(apiErrorMessage(err)))
@@ -102,8 +107,15 @@ export function Dashboard() {
   }
 
   useEffect(() => {
-    if (!cache) load()
-  }, [])
+    const cached = cache[dataset]
+    if (cached) {
+      setData(cached)
+    } else {
+      setData(null)
+      load()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataset])
 
   if (error && !data) return <ErrorNote message={error} />
   if (!data) return <Spinner label="Loading dashboard…" />

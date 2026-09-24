@@ -1,4 +1,5 @@
 export type Role = 'viewer' | 'analyst' | 'admin'
+export type Dataset = 'olist' | 'us'
 
 export interface TokenResponse {
   access_token: string
@@ -97,6 +98,7 @@ export interface StoryStep {
 export interface StoryRequest {
   message: string
   history: StoryStep[]
+  dataset: Dataset
 }
 
 export interface StoryResponse {

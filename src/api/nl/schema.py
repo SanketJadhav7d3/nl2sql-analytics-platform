@@ -5,10 +5,11 @@ always matches reality. Cached after first build.
 """
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache
 
 from sqlalchemy import text
 
+from ..datasets import analytics_schema
 from ..db import engine
 
 # Short human descriptions to give the model business context.
@@ -25,24 +26,25 @@ _OBJECT_NOTES = {
 }
 
 
-@lru_cache(maxsize=1)
-def build_schema_prompt() -> str:
+@cache
+def build_schema_prompt(dataset: str = "olist") -> str:
+    schema = analytics_schema(dataset)
     sql = text(
         """
         SELECT table_name, column_name, data_type, ordinal_position
         FROM information_schema.columns
-        WHERE table_schema = 'analytics'
+        WHERE table_schema = :schema
         ORDER BY table_name, ordinal_position
         """
     )
     cols: dict[str, list[str]] = {}
     with engine.connect() as conn:
-        for r in conn.execute(sql).mappings():
+        for r in conn.execute(sql, {"schema": schema}).mappings():
             cols.setdefault(r["table_name"], []).append(
                 f"{r['column_name']} {r['data_type']}"
             )
 
-    lines = ["Schema `analytics` (read-only). Tables and views:"]
+    lines = [f"Schema `{schema}` (read-only). Tables and views:"]
     for obj, columns in cols.items():
         note = _OBJECT_NOTES.get(obj, "")
         suffix = f"  -- {note}" if note else ""

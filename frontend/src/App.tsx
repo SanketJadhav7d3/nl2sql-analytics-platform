@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { DatasetProvider } from './context/DatasetContext'
+import { StoryProvider } from './context/StoryContext'
+import { AskAIProvider } from './context/AskAIContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
@@ -15,6 +18,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+      <DatasetProvider>
+      <StoryProvider>
+      <AskAIProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -39,6 +45,9 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
+      </AskAIProvider>
+      </StoryProvider>
+      </DatasetProvider>
       </AuthProvider>
     </BrowserRouter>
   )

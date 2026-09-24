@@ -19,15 +19,27 @@ engine: Engine = create_engine(
     future=True,
 )
 
-# Separate engine authenticated as the read-only Postgres role, with the search
-# path pinned to `analytics`. Used to execute ad-hoc /query and /nl-query SQL so
-# least-privilege is enforced by the database itself.
-readonly_engine: Engine = create_engine(
-    settings.readonly_url,
-    pool_pre_ping=True,
-    future=True,
-    connect_args={"options": "-c search_path=analytics"},
-)
+# Separate engines authenticated as the read-only Postgres role, one per
+# dataset's analytics schema (search_path pinned so unqualified table names in
+# generated/ad-hoc SQL resolve to the right dataset). Used to execute /query,
+# /nl-query, and /story SQL so least-privilege is enforced by the database
+# itself. Built lazily/cached since most processes only ever touch one schema.
+_readonly_engines: dict[str, Engine] = {}
+
+
+def get_readonly_engine(schema: str = "analytics") -> Engine:
+    if schema not in _readonly_engines:
+        _readonly_engines[schema] = create_engine(
+            settings.readonly_url,
+            pool_pre_ping=True,
+            future=True,
+            connect_args={"options": f"-c search_path={schema}"},
+        )
+    return _readonly_engines[schema]
+
+
+# Back-compat alias for the default (Olist) dataset.
+readonly_engine: Engine = get_readonly_engine("analytics")
 
 
 def get_conn() -> Iterator[Connection]:

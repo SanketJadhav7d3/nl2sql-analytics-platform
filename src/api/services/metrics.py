@@ -1,9 +1,10 @@
 """Business logic for the reporting endpoints.
 
 Every query uses SQLAlchemy `text()` with **bound parameters** — no string
-interpolation of user input. The one non-bindable knob, `granularity`, is a SQL
-keyword (day/week/month) that can't be a bound parameter, so it is validated
-against a strict whitelist before being placed into the statement.
+interpolation of user input. `granularity` and the schema names are the two
+non-bindable knobs (SQL keywords/identifiers, not values, so they can't be
+bound parameters); both are validated against strict whitelists before being
+placed into the statement text.
 
 Each function takes a Connection and returns plain dicts/objects, keeping it
 independent of FastAPI and therefore unit-testable on its own.
@@ -25,6 +26,7 @@ def revenue_trend(
     granularity: str = "month",
     date_from: date | None = None,
     date_to: date | None = None,
+    analytics: str = "analytics",
 ) -> list[dict]:
     if granularity not in ALLOWED_GRANULARITIES:
         raise ValueError(f"invalid granularity: {granularity!r}")
@@ -35,7 +37,7 @@ def revenue_trend(
             SELECT date_trunc('{granularity}', order_purchase_timestamp)::date AS period,
                    sum(item_revenue)        AS revenue,
                    count(DISTINCT order_id) AS orders
-            FROM analytics.fct_order_items
+            FROM {analytics}.fct_order_items
             WHERE order_status = 'delivered'
               AND (CAST(:date_from AS date) IS NULL
                    OR order_purchase_timestamp >= CAST(:date_from AS date))
@@ -62,12 +64,12 @@ def revenue_trend(
 
 
 # ---------------------------------------------------------------------------
-def top_categories(conn: Connection, limit: int = 10) -> list[dict]:
+def top_categories(conn: Connection, limit: int = 10, analytics: str = "analytics") -> list[dict]:
     sql = text(
-        """
+        f"""
         SELECT revenue_rank, category, revenue, items_sold, orders,
                avg_review_score, revenue_share_pct
-        FROM analytics.vw_category_performance
+        FROM {analytics}.vw_category_performance
         ORDER BY revenue_rank
         LIMIT :limit
         """
@@ -76,14 +78,14 @@ def top_categories(conn: Connection, limit: int = 10) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-def aov(conn: Connection) -> dict:
+def aov(conn: Connection, analytics: str = "analytics", raw: str = "raw") -> dict:
     overall = conn.execute(
         text(
-            """
+            f"""
             SELECT sum(item_revenue)                              AS revenue,
                    count(DISTINCT order_id)                       AS orders,
                    sum(item_revenue) / NULLIF(count(DISTINCT order_id), 0) AS aov
-            FROM analytics.fct_order_items
+            FROM {analytics}.fct_order_items
             WHERE order_status = 'delivered'
             """
         )
@@ -91,13 +93,13 @@ def aov(conn: Connection) -> dict:
 
     by_category = conn.execute(
         text(
-            """
+            f"""
             SELECT dp.category,
                    sum(f.item_revenue) / NULLIF(count(DISTINCT f.order_id), 0) AS aov,
                    count(DISTINCT f.order_id) AS orders,
                    sum(f.item_revenue)        AS revenue
-            FROM analytics.fct_order_items f
-            JOIN analytics.dim_product dp ON dp.product_id = f.product_id
+            FROM {analytics}.fct_order_items f
+            JOIN {analytics}.dim_product dp ON dp.product_id = f.product_id
             WHERE f.order_status = 'delivered'
             GROUP BY dp.category
             ORDER BY revenue DESC
@@ -109,16 +111,16 @@ def aov(conn: Connection) -> dict:
     # per order so each order is counted once.
     by_payment = conn.execute(
         text(
-            """
+            f"""
             WITH order_rev AS (
                 SELECT order_id, sum(item_revenue) AS order_revenue
-                FROM analytics.fct_order_items
+                FROM {analytics}.fct_order_items
                 WHERE order_status = 'delivered'
                 GROUP BY order_id
             ),
             primary_pay AS (
                 SELECT order_id, payment_type
-                FROM raw.order_payments
+                FROM {raw}.order_payments
                 WHERE payment_sequential = 1
             )
             SELECT p.payment_type,
@@ -141,12 +143,12 @@ def aov(conn: Connection) -> dict:
 
 
 # ---------------------------------------------------------------------------
-def delivery_sla(conn: Connection) -> dict:
+def delivery_sla(conn: Connection, analytics: str = "analytics") -> dict:
     by_state = conn.execute(
         text(
-            """
+            f"""
             SELECT customer_state, delivered_items, avg_delivery_days, on_time_pct
-            FROM analytics.vw_delivery_sla
+            FROM {analytics}.vw_delivery_sla
             ORDER BY delivered_items DESC
             """
         )
@@ -154,7 +156,7 @@ def delivery_sla(conn: Connection) -> dict:
 
     overall = conn.execute(
         text(
-            """
+            f"""
             SELECT
                 count(*) FILTER (WHERE order_delivered_customer_date IS NOT NULL)
                                                                    AS delivered_items,
@@ -163,7 +165,7 @@ def delivery_sla(conn: Connection) -> dict:
                     100.0 * count(*) FILTER (WHERE on_time IS TRUE)
                           / NULLIF(count(*) FILTER (WHERE on_time IS NOT NULL), 0)
                 , 2)                                               AS on_time_pct
-            FROM analytics.fct_order_items
+            FROM {analytics}.fct_order_items
             """
         )
     ).mappings().one()
@@ -172,12 +174,12 @@ def delivery_sla(conn: Connection) -> dict:
 
 
 # ---------------------------------------------------------------------------
-def seller_scorecard(conn: Connection, limit: int = 20) -> list[dict]:
+def seller_scorecard(conn: Connection, limit: int = 20, analytics: str = "analytics") -> list[dict]:
     sql = text(
-        """
+        f"""
         SELECT revenue_rank, seller_id, seller_state, revenue, items_sold,
                orders, avg_review_score, avg_delivery_days
-        FROM analytics.vw_seller_scorecard
+        FROM {analytics}.vw_seller_scorecard
         ORDER BY revenue_rank
         LIMIT :limit
         """
@@ -186,17 +188,17 @@ def seller_scorecard(conn: Connection, limit: int = 20) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-def repeat_customers(conn: Connection) -> dict:
+def repeat_customers(conn: Connection, analytics: str = "analytics") -> dict:
     # A "customer" is the real person (customer_unique_id). Repeat = >1 distinct
     # delivered order. Revenue share = revenue from repeat customers / total.
     sql = text(
-        """
+        f"""
         WITH cust AS (
             SELECT dc.customer_unique_id           AS person,
                    count(DISTINCT f.order_id)       AS orders,
                    sum(f.item_revenue)              AS revenue
-            FROM analytics.fct_order_items f
-            JOIN analytics.dim_customer dc ON dc.customer_id = f.customer_id
+            FROM {analytics}.fct_order_items f
+            JOIN {analytics}.dim_customer dc ON dc.customer_id = f.customer_id
             WHERE f.order_status = 'delivered'
             GROUP BY dc.customer_unique_id
         )

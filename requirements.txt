@@ -8,6 +8,7 @@ pydantic-settings>=2.7
 python-jose>=3.3
 google-genai>=1.0
 openai>=1.0
+mlflow>=2.14
 streamlit>=1.40
 pandas>=2.2
 pytest>=8.3

@@ -4,8 +4,15 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
-# Raw dataset is large; keep it out of git.
+# Raw datasets are large; keep them out of git.
 data/raw/*.csv
+data/us-ecommerce-dataset/*.csv
 # Personal learning notes, not project docs.
 docs/gcp-deployment-guide.html
 docs/GCP_Deployment_Guide.pdf
+docs/analytics_platform_explainer.pdf
+# MLflow local tracking store (LLM call traces).
+mlflow.db
+mlruns/
+# Original uncompressed demo video (the compressed copy lives in frontend/public/demo/).
+demo_vid/

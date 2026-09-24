@@ -17,7 +17,8 @@ import re
 from sqlalchemy import text
 
 from .config import settings
-from .db import readonly_engine
+from .datasets import analytics_schema
+from .db import get_readonly_engine
 
 _FORBIDDEN = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|merge|"
@@ -41,28 +42,24 @@ class GuardrailError(ValueError):
     """Raised when a query fails validation."""
 
 
-_allow_cache: set[str] | None = None
+_allow_cache: dict[str, set[str]] = {}
 
 
-def _allowed_objects() -> set[str]:
-    """Lowercased names of all tables + views in the analytics schema."""
-    global _allow_cache
-    if _allow_cache is None:
-        with readonly_engine.connect() as conn:
+def _allowed_objects(schema: str) -> set[str]:
+    """Lowercased names of all tables + views in the given analytics schema."""
+    if schema not in _allow_cache:
+        with get_readonly_engine(schema).connect() as conn:
             rows = conn.execute(
-                text(
-                    """
-                    SELECT table_name FROM information_schema.tables
-                    WHERE table_schema = 'analytics'
-                    """
-                )
+                text("SELECT table_name FROM information_schema.tables WHERE table_schema = :schema"),
+                {"schema": schema},
             )
-            _allow_cache = {r[0].lower() for r in rows}
-    return _allow_cache
+            _allow_cache[schema] = {r[0].lower() for r in rows}
+    return _allow_cache[schema]
 
 
-def validate(sql: str) -> None:
-    """Raise GuardrailError if `sql` is not a safe, read-only analytics query."""
+def validate(sql: str, dataset: str = "olist") -> None:
+    """Raise GuardrailError if `sql` is not a safe, read-only query against the
+    given dataset's analytics schema."""
     if not sql or not sql.strip():
         raise GuardrailError("empty query")
 
@@ -77,7 +74,8 @@ def validate(sql: str) -> None:
     if _FORBIDDEN.search(s):
         raise GuardrailError("query contains a forbidden (non-read-only) keyword")
 
-    allowed = _allowed_objects()
+    schema = analytics_schema(dataset)
+    allowed = _allowed_objects(schema)
     cte_names = {m.lower() for m in _CTE_NAMES.findall(s)}
     # Scan for table refs on a copy with FROM-using functions removed, so e.g.
     # EXTRACT(year FROM order_month) isn't mistaken for "FROM order_month".
@@ -85,8 +83,8 @@ def validate(sql: str) -> None:
     for ref in _REFS.findall(scan):
         name = ref.lower()
         if "." in name:
-            schema, _, obj = name.partition(".")
-            if schema != "analytics":
+            ref_schema, _, obj = name.partition(".")
+            if ref_schema != schema:
                 raise GuardrailError(f"table not allowed: {ref}")
             name = obj
         if name not in allowed and name not in cte_names:
@@ -100,10 +98,11 @@ def enforce_limit(sql: str, max_rows: int | None = None) -> str:
     return f"SELECT * FROM (\n{inner}\n) AS _guarded LIMIT {int(cap)}"
 
 
-def run_read_only(sql: str, max_rows: int | None = None) -> list[dict]:
-    """Validate, cap, and execute on the read-only role. Returns row dicts."""
-    validate(sql)
+def run_read_only(sql: str, dataset: str = "olist", max_rows: int | None = None) -> list[dict]:
+    """Validate, cap, and execute on the read-only role against `dataset`'s
+    analytics schema. Returns row dicts."""
+    validate(sql, dataset)
     wrapped = enforce_limit(sql, max_rows)
-    with readonly_engine.connect() as conn:
+    with get_readonly_engine(analytics_schema(dataset)).connect() as conn:
         rows = conn.execute(text(wrapped)).mappings()
         return [dict(r) for r in rows]

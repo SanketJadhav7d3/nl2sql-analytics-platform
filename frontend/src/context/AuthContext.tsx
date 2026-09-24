@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import { api } from '../lib/api'
+import { api, clearStorySessions } from '../lib/api'
 import type { Role, TokenResponse } from '../lib/types'
 
 interface AuthState {
@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('role')
     localStorage.removeItem('username')
+    clearStorySessions()
     setUsername(null)
     setRole(null)
   }, [])

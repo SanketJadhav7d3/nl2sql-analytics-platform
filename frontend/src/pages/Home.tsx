@@ -96,6 +96,16 @@ export function Home() {
             full order lifecycle: purchase, payment, delivery, and customer review, across multiple sellers and
             product categories.
           </p>
+          <div className="card p-2 mt-10 overflow-hidden">
+            <video
+              src="/demo/story-demo.mp4"
+              controls
+              playsInline
+              preload="metadata"
+              className="w-full rounded-[10px] bg-black"
+            />
+          </div>
+
           <div className="flex gap-3 mt-8">
             <Link
               to={isAuthenticated ? '/dashboard' : '/login'}

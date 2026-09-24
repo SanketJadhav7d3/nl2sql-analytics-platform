@@ -33,7 +33,10 @@ from __future__ import annotations
 import datetime
 import decimal
 import re
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
+
+import mlflow
 
 from ..config import settings
 from ..nl.schema import build_schema_prompt
@@ -59,14 +62,16 @@ def _jsonable(value: Any) -> Any:
     return value
 
 
-def _run_tool_sql(sql: str) -> dict[str, Any]:
+@mlflow.trace(name="run_tool_sql", span_type="TOOL")
+def _run_tool_sql(sql: str, dataset: str = "olist") -> dict[str, Any]:
     """Execute one agent-proposed SQL statement through the normal guardrail
-    + read-only path, capped small, and returned as a JSON-safe dict. Errors
-    come back as a normal dict (not raised) so the model can see what went
-    wrong and try a different query instead of the whole run failing."""
+    + read-only path against `dataset`'s schema, capped small, and returned as
+    a JSON-safe dict. Errors come back as a normal dict (not raised) so the
+    model can see what went wrong and try a different query instead of the
+    whole run failing."""
     try:
         sql = _clean_sql(sql)
-        rows = run_read_only(sql, max_rows=_AGENT_ROW_CAP)
+        rows = run_read_only(sql, dataset, max_rows=_AGENT_ROW_CAP)
     except GuardrailError as exc:
         return {"error": f"guardrail rejected this query: {exc}"}
     except Exception as exc:  # noqa: BLE001  (DB error — surfaced to the model, not raised)
@@ -141,11 +146,11 @@ _RUN_SQL_TOOL_SCHEMA = {
 #   {"type": "done"}                                                   -- terminal, success
 
 
-def _echo_story(message: str, history: list[dict]) -> Iterator[dict]:
+def _echo_story(message: str, history: list[dict], dataset: str = "olist") -> Iterator[dict]:
     """Offline fallback (LLM_PROVIDER=echo) — no API key required."""
     sql = "SELECT category, revenue, revenue_rank FROM vw_category_performance ORDER BY revenue_rank LIMIT 5"
     yield {"type": "tool_call", "sql": sql}
-    result = _run_tool_sql(sql)
+    result = _run_tool_sql(sql, dataset)
     yield {
         "type": "step",
         "role": "assistant",
@@ -199,14 +204,14 @@ def _replay_gemini(history: list[dict]):
     return contents
 
 
-def _run_story_gemini(message: str, history: list[dict]) -> Iterator[dict]:
+def _run_story_gemini(message: str, history: list[dict], dataset: str = "olist") -> Iterator[dict]:
     from google import genai
     from google.genai import types
 
     key = settings.gemini_api_key
     client = genai.Client(api_key=key) if key else genai.Client()
 
-    system_instruction = _SYSTEM_INSTRUCTION_TEMPLATE.format(schema_prompt=build_schema_prompt())
+    system_instruction = _SYSTEM_INSTRUCTION_TEMPLATE.format(schema_prompt=build_schema_prompt(dataset))
     tool = types.Tool(
         function_declarations=[
             types.FunctionDeclaration(
@@ -227,7 +232,9 @@ def _run_story_gemini(message: str, history: list[dict]) -> Iterator[dict]:
     produced_any_narration = False
 
     for _ in range(_MAX_TOOL_CALLS):
-        resp = client.models.generate_content(model=settings.llm_model, contents=contents, config=config)
+        with mlflow.start_span(name="gemini.generate_content", span_type="LLM") as span:
+            span.set_attributes({"provider": "gemini", "model": settings.llm_model})
+            resp = client.models.generate_content(model=settings.llm_model, contents=contents, config=config)
         candidate = resp.candidates[0]
         contents.append(candidate.content)
 
@@ -247,7 +254,7 @@ def _run_story_gemini(message: str, history: list[dict]) -> Iterator[dict]:
             fc = call_part.function_call
             sql = (fc.args or {}).get("sql", "")
             yield {"type": "tool_call", "sql": sql}
-            result = _run_tool_sql(sql)
+            result = _run_tool_sql(sql, dataset)
             if "error" not in result:
                 yield {"type": "step", "role": "assistant", "narration": None, "sql": sql, "columns": result.get("columns"), "rows": result.get("rows")}
             response_parts.append(types.Part.from_function_response(name=fc.name, response=result))
@@ -260,7 +267,9 @@ def _run_story_gemini(message: str, history: list[dict]) -> Iterator[dict]:
         types.Content(role="user", parts=[types.Part(text="Stop investigating now and give your final narration and key takeaway.")])
     )
     final_config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.2)
-    resp = client.models.generate_content(model=settings.llm_model, contents=contents, config=final_config)
+    with mlflow.start_span(name="gemini.generate_content.final", span_type="LLM") as span:
+        span.set_attributes({"provider": "gemini", "model": settings.llm_model})
+        resp = client.models.generate_content(model=settings.llm_model, contents=contents, config=final_config)
     if resp.text:
         produced_any_narration = True
         yield {"type": "step", "role": "assistant", "narration": resp.text, "sql": None, "columns": None, "rows": None}
@@ -299,7 +308,7 @@ def _replay_groq(history: list[dict]) -> list[dict]:
     return messages
 
 
-def _run_story_groq(message: str, history: list[dict]) -> Iterator[dict]:
+def _run_story_groq(message: str, history: list[dict], dataset: str = "olist") -> Iterator[dict]:
     """Same agent loop as Gemini, driven through Groq's OpenAI-compatible
     chat-completions + tool-calling API instead."""
     import json as _json
@@ -310,7 +319,7 @@ def _run_story_groq(message: str, history: list[dict]) -> Iterator[dict]:
 
     client = OpenAI(api_key=settings.groq_api_key, base_url="https://api.groq.com/openai/v1")
 
-    system_instruction = _SYSTEM_INSTRUCTION_TEMPLATE.format(schema_prompt=build_schema_prompt())
+    system_instruction = _SYSTEM_INSTRUCTION_TEMPLATE.format(schema_prompt=build_schema_prompt(dataset))
     tools = [
         {
             "type": "function",
@@ -327,13 +336,15 @@ def _run_story_groq(message: str, history: list[dict]) -> Iterator[dict]:
     produced_any_narration = False
 
     for _ in range(_MAX_TOOL_CALLS):
-        resp = groq_call_with_retry(
-            lambda model: client.chat.completions.create(
-                model=model, messages=messages, tools=tools, tool_choice="auto", temperature=0.2
-            ),
-            model=settings.groq_model,
-            fallback_model=settings.groq_fallback_model,
-        )
+        with mlflow.start_span(name="groq.chat_completion", span_type="LLM") as span:
+            resp = groq_call_with_retry(
+                lambda model: client.chat.completions.create(
+                    model=model, messages=messages, tools=tools, tool_choice="auto", temperature=0.2
+                ),
+                model=settings.groq_model,
+                fallback_model=settings.groq_fallback_model,
+            )
+            span.set_attributes({"provider": "groq", "model": resp.model})
         msg = resp.choices[0].message
 
         if msg.content:
@@ -357,17 +368,19 @@ def _run_story_groq(message: str, history: list[dict]) -> Iterator[dict]:
             args = _json.loads(tc.function.arguments or "{}")
             sql = args.get("sql", "")
             yield {"type": "tool_call", "sql": sql}
-            result = _run_tool_sql(sql)
+            result = _run_tool_sql(sql, dataset)
             if "error" not in result:
                 yield {"type": "step", "role": "assistant", "narration": None, "sql": sql, "columns": result.get("columns"), "rows": result.get("rows")}
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": _json.dumps(result)})
     else:
         messages.append({"role": "user", "content": "Stop investigating now and give your final narration and key takeaway."})
-        resp = groq_call_with_retry(
-            lambda model: client.chat.completions.create(model=model, messages=messages, temperature=0.2),
-            model=settings.groq_model,
-            fallback_model=settings.groq_fallback_model,
-        )
+        with mlflow.start_span(name="groq.chat_completion.final", span_type="LLM") as span:
+            resp = groq_call_with_retry(
+                lambda model: client.chat.completions.create(model=model, messages=messages, temperature=0.2),
+                model=settings.groq_model,
+                fallback_model=settings.groq_fallback_model,
+            )
+            span.set_attributes({"provider": "groq", "model": resp.model})
         final_text = resp.choices[0].message.content
         if final_text:
             produced_any_narration = True
@@ -377,7 +390,7 @@ def _run_story_groq(message: str, history: list[dict]) -> Iterator[dict]:
         yield {"type": "step", "role": "assistant", "narration": "The agent didn't produce a response.", "sql": None, "columns": None, "rows": None}
 
 
-def run_story_stream(message: str, history: list[dict] | None = None) -> Iterator[dict]:
+def run_story_stream(message: str, history: list[dict] | None = None, dataset: str = "olist") -> Iterator[dict]:
     """Top-level entry point. Yields events as they happen (see the shapes
     documented above). Always ends with exactly one terminal event:
     {"type": "done"} on success, {"type": "error", ...} on failure.
@@ -394,13 +407,13 @@ def run_story_stream(message: str, history: list[dict] | None = None) -> Iterato
     history = history or []
 
     if settings.llm_provider == "echo":
-        yield from _echo_story(message, history)
+        yield from _echo_story(message, history, dataset)
         yield {"type": "done"}
         return
 
     emitted = False
     try:
-        for event in _run_story_gemini(message, history):
+        for event in _run_story_gemini(message, history, dataset):
             emitted = True
             yield event
         yield {"type": "done"}
@@ -412,7 +425,7 @@ def run_story_stream(message: str, history: list[dict] | None = None) -> Iterato
         # Nothing reached the client yet — safe to retry transparently on Groq.
 
     try:
-        for event in _run_story_groq(message, history):
+        for event in _run_story_groq(message, history, dataset):
             yield event
         yield {"type": "done"}
     except Exception as exc:  # noqa: BLE001

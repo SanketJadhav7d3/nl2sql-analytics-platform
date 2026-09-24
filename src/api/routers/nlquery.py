@@ -1,4 +1,4 @@
-"""/nl-query — natural-language question -> guarded SQL -> rows (analyst+admin)."""
+"""/nl-query — natural-language question -> guarded SQL -> rows (all roles)."""
 from __future__ import annotations
 
 from typing import Any
@@ -22,16 +22,16 @@ def post_nl_query(
     adapter: LLMAdapter = Depends(get_adapter),
 ) -> NLQueryResponse:
     try:
-        result = nl_query(body.question, adapter)
+        result = nl_query(body.question, adapter, body.dataset)
     except GuardrailError as exc:
         service.record_audit(user["username"], user["role"], "nl-query",
-                             status="denied", detail=f"{body.question} -> {exc}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"guardrail: {exc}")
+                             status="denied", detail=f"[{body.dataset}] {body.question} -> {exc}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"guardrail: {exc}") from exc
     except Exception as exc:  # noqa: BLE001  (LLM error or RO permission denial)
         service.record_audit(user["username"], user["role"], "nl-query",
-                             status="error", detail=f"{body.question} -> {exc}")
+                             status="error", detail=f"[{body.dataset}] {body.question} -> {exc}")
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            f"could not answer question: {exc}")
+                            f"could not answer question: {exc}") from exc
 
     service.record_audit(user["username"], user["role"], "nl-query",
                          status="allowed",

@@ -1,6 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useDataset, DATASET_LABELS, DATASET_SHORT_LABELS } from '../context/DatasetContext'
+import type { Dataset } from '../lib/types'
 import { ParticleField } from './ParticleField'
+
+const DATASETS: Dataset[] = ['olist', 'us']
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: OrbitIcon, roles: ['viewer', 'analyst', 'admin'] },
@@ -13,6 +17,7 @@ const navItems = [
 
 export function Layout() {
   const { username, role, logout } = useAuth()
+  const { dataset, setDataset } = useDataset()
 
   return (
     <div className="relative min-h-screen">
@@ -20,11 +25,30 @@ export function Layout() {
       <ParticleField />
       <div className="relative z-10 flex min-h-screen">
         <aside className="w-60 shrink-0 border-r border-hairline flex flex-col px-4 py-6">
-          <div className="flex items-center gap-2 px-2 mb-8">
+          <div className="flex items-center gap-2 px-2 mb-6">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-accent to-series-7 shadow-[0_0_20px_rgba(109,123,255,0.5)]" />
             <div>
               <p className="text-sm font-semibold leading-tight">Orbit Analytics</p>
-              <p className="text-[11px] text-ink-muted leading-tight">Olist e-commerce</p>
+              <p className="text-[11px] text-ink-muted leading-tight">{DATASET_LABELS[dataset]}</p>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-[10px] uppercase tracking-wide text-ink-muted px-2 mb-1.5">Dataset</p>
+            <div className="flex bg-white/5 border border-hairline rounded-lg p-0.5">
+              {DATASETS.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDataset(d)}
+                  className={`flex-1 text-xs font-medium rounded-md px-2 py-1.5 transition-colors ${
+                    dataset === d
+                      ? 'bg-accent text-white'
+                      : 'text-ink-secondary hover:text-ink-primary'
+                  }`}
+                >
+                  {DATASET_SHORT_LABELS[d]}
+                </button>
+              ))}
             </div>
           </div>
 

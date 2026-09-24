@@ -8,6 +8,20 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Story conversations are stored per-dataset (story:messages:<dataset>) —
+// clear all of them, not a single fixed key, so logout/401 doesn't leave a
+// stale conversation behind for the next login.
+export function clearStorySessions() {
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i)
+      if (key?.startsWith('story:messages:')) sessionStorage.removeItem(key)
+    }
+  } catch {
+    /* storage unavailable — nothing to clear */
+  }
+}
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -15,6 +29,7 @@ api.interceptors.response.use(
       localStorage.removeItem('access_token')
       localStorage.removeItem('role')
       localStorage.removeItem('username')
+      clearStorySessions()
       if (location.pathname !== '/login') location.href = '/login'
     }
     return Promise.reject(err)
@@ -50,7 +65,7 @@ export interface StoryEvent {
  * and caller-initiated cancellation via AbortSignal.
  */
 export async function* streamStory(
-  body: { message: string; history: unknown[] },
+  body: { message: string; history: unknown[]; dataset: string },
   signal?: AbortSignal,
 ): AsyncGenerator<StoryEvent> {
   const token = localStorage.getItem('access_token')
@@ -76,6 +91,7 @@ export async function* streamStory(
       localStorage.removeItem('access_token')
       localStorage.removeItem('role')
       localStorage.removeItem('username')
+      clearStorySessions()
       if (location.pathname !== '/login') location.href = '/login'
     }
     throw new Error(message)

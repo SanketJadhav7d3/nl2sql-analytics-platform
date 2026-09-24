@@ -105,8 +105,13 @@ def test_guardrails_reject_malicious_generation(client, analyst_token, malicious
     assert "guardrail" in r.json()["detail"].lower()
 
 
-# ---- RBAC: viewer may not use NL-to-SQL -------------------------------------
-def test_viewer_denied(client):
+# ---- RBAC: viewers MAY use NL-to-SQL ----------------------------------------
+# Unlike /query (analyst+admin), /nl-query is open to viewers: they never author
+# the SQL themselves, and whatever the model writes still goes through the same
+# guardrail + read-only role, so a viewer cannot reach anything a dashboard
+# wouldn't already show them. Raw /query stays restricted because there the user
+# chooses the SQL directly. See test_auth_rbac.test_viewer_denied_query.
+def test_viewer_allowed(client):
     viewer_admin = client.post("/auth/login",
                                json={"username": "admin", "password": "admin123"}).json()["access_token"]
     uname = f"nlq_viewer_{uuid.uuid4().hex[:8]}"
@@ -114,5 +119,6 @@ def test_viewer_denied(client):
                 json={"username": uname, "password": "pw123456", "role": "viewer"})
     vt = client.post("/auth/login",
                      json={"username": uname, "password": "pw123456"}).json()["access_token"]
-    r = _ask(client, vt, "SELECT 1 FROM vw_category_performance LIMIT 1")
-    assert r.status_code == 403
+    r = _ask(client, vt, "SELECT category FROM vw_category_performance LIMIT 1")
+    assert r.status_code == 200, r.text
+    assert r.json()["row_count"] > 0

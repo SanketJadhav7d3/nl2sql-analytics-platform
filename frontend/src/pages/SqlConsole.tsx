@@ -1,15 +1,19 @@
 import { useState, type FormEvent } from 'react'
 import { api, apiErrorMessage } from '../lib/api'
 import type { QueryResponse } from '../lib/types'
+import { useDataset, DATASET_LABELS } from '../context/DatasetContext'
 import { Card } from '../components/Card'
 import { ResultsView } from '../components/ResultsView'
 import { Spinner, ErrorNote } from '../components/Spinner'
 
 export function SqlConsole() {
-  const [sql, setSql] = useState('select * from analytics.dim_product limit 10;')
+  // Unqualified — the server resolves this against whichever dataset's
+  // schema is selected, so the same default query works for either.
+  const [sql, setSql] = useState('select * from dim_product limit 10;')
   const [result, setResult] = useState<QueryResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { dataset } = useDataset()
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -18,7 +22,7 @@ export function SqlConsole() {
     setError(null)
     setResult(null)
     try {
-      const { data } = await api.post<QueryResponse>('/query', { sql })
+      const { data } = await api.post<QueryResponse>('/query', { sql, dataset })
       setResult(data)
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -32,7 +36,7 @@ export function SqlConsole() {
       <div>
         <h1 className="text-2xl font-semibold">SQL Console</h1>
         <p className="text-sm text-ink-muted mt-1">
-          Run vetted, read-only SQL directly against the analytics schema.
+          Run vetted, read-only SQL against the <span className="text-ink-secondary">{DATASET_LABELS[dataset]}</span> analytics schema.
         </p>
       </div>
 
