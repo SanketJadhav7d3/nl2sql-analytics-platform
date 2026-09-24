@@ -23,11 +23,11 @@ def run_query(
     except GuardrailError as exc:
         service.record_audit(user["username"], user["role"], "query",
                              status="denied", detail=f"[{body.dataset}] {body.sql} -> {exc}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"guardrail: {exc}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"guardrail: {exc}") from exc
     except Exception as exc:  # noqa: BLE001  (e.g. permission denied from RO role)
         service.record_audit(user["username"], user["role"], "query",
                              status="error", detail=f"[{body.dataset}] {body.sql} -> {exc}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"query failed: {exc}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"query failed: {exc}") from exc
 
     service.record_audit(user["username"], user["role"], "query",
                          status="allowed", detail=body.sql)

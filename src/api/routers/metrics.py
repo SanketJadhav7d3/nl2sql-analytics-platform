@@ -11,7 +11,6 @@ from sqlalchemy.engine import Connection
 from ..datasets import analytics_schema, raw_schema
 from ..db import get_conn
 from ..deps import authorized
-from ..services import metrics as svc
 from ..schemas import (
     AovResponse,
     CategoryPerformance,
@@ -20,6 +19,7 @@ from ..schemas import (
     RevenueResponse,
     SellerScore,
 )
+from ..services import metrics as svc
 
 # Any authenticated role (viewer/analyst/admin) may read metrics; the dependency
 # also writes an audit row for every access.

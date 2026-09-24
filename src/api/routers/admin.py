@@ -30,7 +30,7 @@ def create_user(
     try:
         created = service.create_user(body.username, body.password, body.role)
     except Exception as exc:  # noqa: BLE001 (unique violation, etc.)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"could not create user: {exc}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"could not create user: {exc}") from exc
     service.record_audit(user["username"], user["role"], "admin:create_user",
                          status="allowed", detail=f"{body.username} ({body.role})")
     return created

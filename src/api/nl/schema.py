@@ -5,7 +5,7 @@ always matches reality. Cached after first build.
 """
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache
 
 from sqlalchemy import text
 
@@ -26,7 +26,7 @@ _OBJECT_NOTES = {
 }
 
 
-@lru_cache(maxsize=None)
+@cache
 def build_schema_prompt(dataset: str = "olist") -> str:
     schema = analytics_schema(dataset)
     sql = text(

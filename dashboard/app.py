@@ -11,8 +11,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
-
-from api_client import ApiClient, ApiError, API_BASE
+from api_client import API_BASE, ApiClient, ApiError
 
 st.set_page_config(page_title="Olist Analytics", page_icon="📊", layout="wide")
 

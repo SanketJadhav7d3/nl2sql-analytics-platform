@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import re
 
+from ..sql_guard import run_read_only
 from .adapter import LLMAdapter
 from .schema import build_schema_prompt
-from ..sql_guard import run_read_only
 
 _FENCE = re.compile(r"^```(?:sql)?\s*|\s*```$", re.IGNORECASE)
 

@@ -1,0 +1,32 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E4/E7/E9 + F are ruff's own defaults (deliberately not all of E: E501
+# line-length is left out, since there is no formatter in this project and the
+# long lines are mostly single-line dict literals that read fine as they are).
+# I sorts imports, UP modernises syntax, B catches real bug patterns.
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+# UP047: PEP 695 generic syntax. Cosmetic, and the current form is clearer here.
+ignore = ["UP047"]
+
+[tool.ruff.lint.flake8-bugbear]
+# B008 ("no function calls in argument defaults") is a false positive for
+# FastAPI: Depends()/Query()/Body() in a default IS the framework's API, and
+# FastAPI resolves them per-request rather than reusing one shared object.
+# Tell bugbear these calls are intentional.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+    # Our own dependency factory: authorized("admin") returns the callable
+    # FastAPI injects, so it belongs in a default exactly like Depends does.
+    "src.api.deps.authorized",
+]
