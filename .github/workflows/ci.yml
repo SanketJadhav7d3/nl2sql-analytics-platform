@@ -12,12 +12,12 @@
 
 name: CI
 
-# Run on pushes to main/tags and on pull requests. A push to a branch that has
-# an open PR only triggers the pull_request event here, so there is no
-# duplicate-pipeline problem to work around.
+# Run on every branch push, on tags, and on pull requests. A push to a branch that has
+# an open PR triggers the pull_request event, and the concurrency group below
+# cancels the superseded branch run, so duplicates are not a problem.
 on:
   push:
-    branches: [main]
+    branches: ['**']
     tags: ['*']
   pull_request:
 
@@ -107,7 +107,7 @@ jobs:
   # Runs only on main and tags, after tests pass.
   build:
     needs: test
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
