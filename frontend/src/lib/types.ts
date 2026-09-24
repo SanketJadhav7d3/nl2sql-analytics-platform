@@ -93,6 +93,17 @@ export interface StoryStep {
   sql: string | null
   columns: string[] | null
   rows: Record<string, unknown>[] | null
+  /**
+   * UI-only marker for an inline notice in the transcript (currently: the
+   * agent recovered onto its fallback LLM provider mid-turn). Not conversation
+   * content, so these steps are filtered out of the `history` sent back to the
+   * server — they exist purely so the user can see where the turn changed
+   * hands rather than being told nothing.
+   */
+  notice?: string | null
+  /** Raw provider error behind `notice` — collapsed in the UI, since it is
+   *  typically a wall of provider JSON. */
+  noticeDetail?: string | null
 }
 
 export interface StoryRequest {
