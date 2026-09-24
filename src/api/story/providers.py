@@ -69,9 +69,31 @@ def _tool_payload(step: dict[str, Any]) -> dict[str, Any]:
 
 # ---------------------------------------------------------------------------
 class GeminiProvider:
+    """Gemini, with one wrinkle: replayed function calls need a signature.
+
+    Gemini rejects a `functionCall` part that is missing its
+    `thought_signature` (400 INVALID_ARGUMENT), and that signature only exists
+    on the part the model itself produced. Reconstructing a call from our
+    neutral transcript therefore cannot produce a valid native part.
+
+    So this provider remembers the signature it was given for each SQL string
+    it proposed (`_signatures`) and replays those calls natively. Anything it
+    has no signature for -- history from an earlier turn, or steps another
+    provider ran before recovery switched to us -- is replayed as plain text
+    instead. The model still sees the SQL and the rows; it just isn't framed
+    as a native tool exchange. That keeps a transcript replayable across
+    providers and across turns, which native parts alone cannot be.
+    """
+
     name = "gemini"
 
+    def __init__(self) -> None:
+        # SQL string -> the thought_signature Gemini returned with that call.
+        self._signatures: dict[str, bytes] = {}
+
     def _replay(self, transcript: list[dict[str, Any]]):
+        import json as _json
+
         from google.genai import types
 
         contents = []
@@ -85,6 +107,28 @@ class GeminiProvider:
                     )
                 )
             elif step.get("sql") is not None:
+                signature = self._signatures.get(step["sql"])
+                if signature is None:
+                    # No signature: describe the exchange in text rather than
+                    # sending a native call that Gemini would reject.
+                    contents.append(
+                        types.Content(
+                            role="model",
+                            parts=[types.Part(text=f"I ran this query:\n{step['sql']}")],
+                        )
+                    )
+                    contents.append(
+                        types.Content(
+                            role="user",
+                            parts=[
+                                types.Part(
+                                    text="Result of that query:\n"
+                                    + _json.dumps(_tool_payload(step), default=str)
+                                )
+                            ],
+                        )
+                    )
+                    continue
                 contents.append(
                     types.Content(
                         role="model",
@@ -92,7 +136,8 @@ class GeminiProvider:
                             types.Part(
                                 functionCall=types.FunctionCall(
                                     name="run_sql", args={"sql": step["sql"]}
-                                )
+                                ),
+                                thoughtSignature=signature,
                             )
                         ],
                     )
@@ -148,7 +193,18 @@ class GeminiProvider:
 
         parts = resp.candidates[0].content.parts or []
         text = "\n".join(p.text for p in parts if p.text) or None
-        calls = [(p.function_call.args or {}).get("sql", "") for p in parts if p.function_call]
+
+        calls = []
+        for part in parts:
+            if not part.function_call:
+                continue
+            sql = (part.function_call.args or {}).get("sql", "")
+            calls.append(sql)
+            # Remember the signature so this call can be replayed natively on
+            # the next step of this turn (see the class docstring).
+            if part.thought_signature:
+                self._signatures[sql] = part.thought_signature
+
         return Proposal(narration=text, calls=calls)
 
 
